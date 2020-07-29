@@ -40,8 +40,8 @@ void Dlist<T>::insertBack(T *op) {
     } else {
         node *temp = new node;
         temp->op = op;
-        temp->next = nullptr;
         temp->prev = last;
+        temp->next = nullptr;
         last->next = temp;
         last = temp;
     }
