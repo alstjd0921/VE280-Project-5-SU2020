@@ -1,29 +1,30 @@
 #include "dlist.h"
 #include <iostream>
+#include <cstdlib>
 #include <sstream>
 
 using namespace std;
 
 class LRUCache {
 private:
-    int mem_size;
+    int mem_size; //size of memory
     int *memory;
 
     struct block {
-        int address;
+        int address;  //its address in memory
         int data;
     };
 
     Dlist<block> cache;
-    int cur_cache_size;
-    int max_cache_size;
+    int cur_cache_size;  //current length of cache
+    int max_cache_size;  //maximum length of cache
 
     static bool compare(const block *a, const block *b);
+    //EFFECTS: returns true if two blocks have the same address
 
 public:
-    LRUCache(int max_cache_size, int mem_size);
-
-    ~LRUCache();
+    LRUCache(int cache_size, int memory_size);  //constructor
+    ~LRUCache();  //destructor
 
     int read(int address);
 
@@ -38,42 +39,42 @@ bool LRUCache::compare(const block *a, const block *b) {
     return a->address == b->address;
 }
 
-LRUCache::LRUCache(int max_cache_size, int mem_size) {
-    this->max_cache_size = max_cache_size;
-    this->mem_size = mem_size;
+LRUCache::LRUCache(int cache_size, int memory_size) {
+    max_cache_size = cache_size;
+    mem_size = memory_size;
+    cur_cache_size = 0;
+    memory = new int[mem_size];
+    for (int i = 0; i < mem_size; i++) {
+        memory[i] = 0;
+    }
 }
 
 LRUCache::~LRUCache() {
-    if (mem_size > 0) {
-        delete[] memory;
-    }
+    if (mem_size > 0) delete[] memory;
 }
 
 int LRUCache::read(int address) {
-    if (address >= mem_size) {
-        throw -1;
-    }
+    if (address >= mem_size) throw -1;
     bool hit = false;
     block *b = nullptr;
-
     for (int i = 0; i < cur_cache_size; i++) {
-        block *ptr = cache.removeFront();
-        if (ptr->address == address) {
+        block *temp = cache.removeFront();
+        if (temp->address == address) {
             hit = true;
-            b = ptr;
+            b = temp;
             continue;
         }
-        cache.insertBack(ptr);
+        cache.insertBack(temp);
     }
     if (hit) {
         cache.insertFront(b);
         return b->data;
     } else {
         if (cur_cache_size == max_cache_size) {
-            block *ptr = cache.removeBack();
+            block *rm = cache.removeBack();
             cur_cache_size--;
-            memory[ptr->address] = ptr->data;
-            delete ptr;
+            memory[rm->address] = rm->data;
+            delete rm;
         }
         b = new block;
         b->address = address;
@@ -94,9 +95,9 @@ void LRUCache::write(int address, int data) {
 void LRUCache::printCache() {
     Dlist<block> copy = cache;
     while (!copy.isEmpty()) {
-        block *ptr = copy.removeFront();
-        cout << ptr->address << " " << ptr->data << endl;
-        delete ptr;
+        block *rm = copy.removeFront();
+        cout << rm->address << " " << rm->data << endl;
+        delete rm;
     }
 }
 
@@ -107,23 +108,23 @@ void LRUCache::printMem() {
     cout << endl;
 }
 
-int main(int argc, const char *argv[]) {
-    int max_cache_size, mem_size;
-    cin >> max_cache_size >> mem_size;
-    LRUCache cache(max_cache_size, mem_size);
+int main() {
+    int cache_size, memory_size;
+    cin >> cache_size >> memory_size;
+    LRUCache cache(cache_size, memory_size);
     string command;
     getline(cin, command);
     while (getline(cin, command)) {
         istringstream Istream;
         Istream.str(command);
 
-        string opr, addition;
+        string opr;
+        string addition;
         Istream >> opr;
-
         if (opr == "READ") {
             int address;
-            bool flag = bool(Istream >> address);
-            if (!flag) {
+            bool judge = bool(Istream >> address);
+            if (!judge) {
                 cout << "ERROR: Not enough operands" << endl;
                 continue;
             }
@@ -131,20 +132,20 @@ int main(int argc, const char *argv[]) {
                 cout << "ERROR: Too many operands" << endl;
                 continue;
             }
-            if (address >= mem_size) {
+            if (address >= memory_size) {
                 cout << "ERROR: Address out of bound" << endl;
                 continue;
             }
             cout << cache.read(address) << endl;
         } else if (opr == "WRITE") {
             int address, data;
-            bool flag = bool(Istream >> address);
-            if (!flag) {
+            bool temp1 = bool(Istream >> address);
+            if (!temp1) {
                 cout << "ERROR: Not enough operands" << endl;
                 continue;
             }
-            flag = bool(Istream >> data);
-            if (!flag) {
+            bool temp2 = bool(Istream >> data);
+            if (!temp2) {
                 cout << "ERROR: Not enough operands" << endl;
                 continue;
             }
@@ -152,7 +153,7 @@ int main(int argc, const char *argv[]) {
                 cout << "ERROR: Too many operands" << endl;
                 continue;
             }
-            if (address >= mem_size) {
+            if (address >= memory_size) {
                 cout << "ERROR: Address out of bound" << endl;
                 continue;
             }
@@ -168,6 +169,5 @@ int main(int argc, const char *argv[]) {
             continue;
         }
     }
-
     return 0;
 }
