@@ -1,5 +1,5 @@
-#ifndef PROJECT5_DLIST_IMPL_H
-#define PROJECT5_DLIST_IMPL_H
+#ifndef DLIST_IMPL_H
+#define DLIST_IMPL_H
 
 #include <iostream>
 #include "dlist.h"
@@ -151,4 +151,4 @@ void Dlist<T>::copyAll(const Dlist<T> &l) {
     }
 }
 
-#endif //PROJECT5_DLIST_IMPL_H
+#endif //DLIST_IMPL_H
