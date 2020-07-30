@@ -1,30 +1,29 @@
 #include "dlist.h"
 #include <iostream>
-#include <cstdlib>
 #include <sstream>
 
 using namespace std;
 
 class LRUCache {
 private:
-    int mem_size; //size of memory
+    int mem_size;
     int *memory;
 
     struct block {
-        int address;  //its address in memory
+        int address;
         int data;
     };
 
     Dlist<block> cache;
-    int cur_cache_size;  //current length of cache
-    int max_cache_size;  //maximum length of cache
+    int cur_cache_size;
+    int max_cache_size;
 
     static bool compare(const block *a, const block *b);
-    //EFFECTS: returns true if two blocks have the same address
 
 public:
-    LRUCache(int cache_size, int memory_size);  //constructor
-    ~LRUCache();  //destructor
+    LRUCache(int cache_size, int memory_size);
+
+    ~LRUCache();
 
     int read(int address);
 
@@ -54,27 +53,31 @@ LRUCache::~LRUCache() {
 }
 
 int LRUCache::read(int address) {
-    if (address >= mem_size) throw -1;
-    bool hit = false;
+    if (address >= mem_size) {
+        throw -1;
+    }
+
+    bool flag = false;
     block *b = nullptr;
     for (int i = 0; i < cur_cache_size; i++) {
         block *temp = cache.removeFront();
         if (temp->address == address) {
-            hit = true;
+            flag = true;
             b = temp;
             continue;
         }
         cache.insertBack(temp);
     }
-    if (hit) {
+
+    if (flag) {
         cache.insertFront(b);
         return b->data;
     } else {
         if (cur_cache_size == max_cache_size) {
-            block *rm = cache.removeBack();
+            block *ptr = cache.removeBack();
             cur_cache_size--;
-            memory[rm->address] = rm->data;
-            delete rm;
+            memory[ptr->address] = ptr->data;
+            delete ptr;
         }
         b = new block;
         b->address = address;
@@ -95,9 +98,9 @@ void LRUCache::write(int address, int data) {
 void LRUCache::printCache() {
     Dlist<block> copy = cache;
     while (!copy.isEmpty()) {
-        block *rm = copy.removeFront();
-        cout << rm->address << " " << rm->data << endl;
-        delete rm;
+        block *ptr = copy.removeFront();
+        cout << ptr->address << " " << ptr->data << endl;
+        delete ptr;
     }
 }
 
