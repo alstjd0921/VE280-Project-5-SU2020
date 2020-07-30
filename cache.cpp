@@ -18,8 +18,6 @@ private:
     int cur_cache_size;
     int max_cache_size;
 
-    static bool compare(const block *a, const block *b);
-
 public:
     LRUCache(int cache_size, int memory_size);
 
@@ -34,10 +32,6 @@ public:
     void printMem();
 };
 
-bool LRUCache::compare(const block *a, const block *b) {
-    return a->address == b->address;
-}
-
 LRUCache::LRUCache(int cache_size, int memory_size) {
     max_cache_size = cache_size;
     mem_size = memory_size;
@@ -49,7 +43,9 @@ LRUCache::LRUCache(int cache_size, int memory_size) {
 }
 
 LRUCache::~LRUCache() {
-    if (mem_size > 0) delete[] memory;
+    if (mem_size > 0) {
+        delete[] memory;
+    }
 }
 
 int LRUCache::read(int address) {
@@ -114,24 +110,25 @@ void LRUCache::printMem() {
 int main() {
     int cache_size, memory_size;
     cin >> cache_size >> memory_size;
+
     LRUCache cache(cache_size, memory_size);
+
     string command;
     getline(cin, command);
     while (getline(cin, command)) {
         istringstream Istream;
         Istream.str(command);
+        string instruction, remaining;
+        Istream >> instruction;
 
-        string opr;
-        string addition;
-        Istream >> opr;
-        if (opr == "READ") {
+        if (instruction == "READ") {
             int address;
             bool judge = bool(Istream >> address);
             if (!judge) {
                 cout << "ERROR: Not enough operands" << endl;
                 continue;
             }
-            if (Istream >> addition) {
+            if (Istream >> remaining) {
                 cout << "ERROR: Too many operands" << endl;
                 continue;
             }
@@ -140,19 +137,17 @@ int main() {
                 continue;
             }
             cout << cache.read(address) << endl;
-        } else if (opr == "WRITE") {
+        } else if (instruction == "WRITE") {
             int address, data;
-            bool temp1 = bool(Istream >> address);
-            if (!temp1) {
+            if (!bool(Istream >> address)) {
                 cout << "ERROR: Not enough operands" << endl;
                 continue;
             }
-            bool temp2 = bool(Istream >> data);
-            if (!temp2) {
+            if (!bool(Istream >> data)) {
                 cout << "ERROR: Not enough operands" << endl;
                 continue;
             }
-            if (Istream >> addition) {
+            if (Istream >> remaining) {
                 cout << "ERROR: Too many operands" << endl;
                 continue;
             }
@@ -161,16 +156,17 @@ int main() {
                 continue;
             }
             cache.write(address, data);
-        } else if (opr == "PRINTCACHE") {
+        } else if (instruction == "PRINTCACHE") {
             cache.printCache();
-        } else if (opr == "PRINTMEM") {
+        } else if (instruction == "PRINTMEM") {
             cache.printMem();
-        } else if (opr == "EXIT") {
+        } else if (instruction == "EXIT") {
             break;
         } else {
             cout << "ERROR: Unknown instruction" << endl;
             continue;
         }
     }
+
     return 0;
 }
